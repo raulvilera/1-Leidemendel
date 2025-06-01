@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1ª Lei de Mendel - Jogo Interativo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .instructions {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .instructions h2 {
+            margin-bottom: 15px;
+            color: #ffd700;
+            text-align: center;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .allele-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            width: 300px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .allele-container h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ffd700;
+        }
+        
+        .alleles {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .allele {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: move;
+            user-select: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .allele:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .allele.dominant {
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            border: 3px solid #ff5722;
+        }
+        
+        .allele.recessive {
+            background: linear-gradient(135deg, #2193b0, #6dd5ed);
+            border: 3px solid #2193b0;
+        }
+        
+        .punnett-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            width: 600px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .punnett-container h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ffd700;
+        }
+        
+        .punnett-board {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+            height: 400px;
+            margin: 0 auto;
+        }
+        
+        .punnett-cell {
+            border: 3px solid #4a90e2;
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .punnett-cell.highlight {
+            box-shadow: 0 0 15px rgba(74, 144, 226, 0.8);
+            border-color: #ffd700;
+        }
+        
+        .top-allele, .left-allele {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.8rem;
+        }
+        
+        .top-allele {
+            top: -30px;
+        }
+        
+        .left-allele {
+            left: -30px;
+        }
+        
+        .genotype {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .phenotype {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .plant {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .stem {
+            width: 5px;
+            height: 60px;
+            background: #228b22;
+        }
+        
+        .flower {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: -10px;
+            font-size: 1.5rem;
+        }
+        
+        .phenotype-text {
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        button {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .allele-container, .punnett-container {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>1ª LEI DE MENDEL - JOGO INTERATIVO</h1>
+        </header>
+        
+        <div class="instructions">
+            <h2>Como Jogar</h2>
+            <p>Este jogo ensina os princípios da 1ª Lei de Mendel, também conhecida como Lei da Segregação dos Fatores.</p>
+            <ul>
+                <li>Arraste os alelos para as posições correspondentes no quadro de Punnett</li>
+                <li>Os alelos <strong>A</strong> (dominante) produzem flores roxas</li>
+                <li>Os alelos <strong>a</strong> (recessivo) produzem flores brancas</li>
+                <li>Observe como as combinações genéticas resultam em fenótipos diferentes</li>
+                <li>Complete todos os quadrantes para ver todas as possíveis combinações</li>
+            </ul>
+        </div>
+        
+        <div class="game-container">
+            <div class="allele-container">
+                <h3>Alelos Disponíveis</h3>
+                <div class="alleles">
+                    <div class="allele dominant" draggable="true" data-allele="A">A</div>
+                    <div class="allele dominant" draggable="true" data-allele="A">A</div>
+                    <div class="allele recessive" draggable="true" data-allele="a">a</div>
+                    <div class="allele recessive" draggable="true" data-allele="a">a</div>
+                </div>
+            </div>
+            
+            <div class="punnett-container">
+                <h3>Quadro de Punnett</h3>
+                <div class="punnett-board">
+                    <div class="punnett-cell" data-cell="1">
+                        <div class="top-allele"></div>
+                        <div class="left-allele"></div>
+                        <div class="genotype"></div>
+                        <div class="phenotype"></div>
+                    </div>
+                    <div class="punnett-cell" data-cell="2">
+                        <div class="top-allele"></div>
+                        <div class="left-allele"></div>
+                        <div class="genotype"></div>
+                        <div class="phenotype"></div>
+                    </div>
+                    <div class="punnett-cell" data-cell="3">
+                        <div class="top-allele"></div>
+                        <div class="left-allele"></div>
+                        <div class="genotype"></div>
+                        <div class="phenotype"></div>
+                    </div>
+                    <div class="punnett-cell" data-cell="4">
+                        <div class="top-allele"></div>
+                        <div class="left-allele"></div>
+                        <div class="genotype"></div>
+                        <div class="phenotype"></div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button id="reset-btn">Reiniciar Jogo</button>
+                    <button id="check-btn">Verificar Respostas</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #ff7e5f, #feb47b);"></div>
+                <span>Alelo Dominante (A)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #2193b0, #6dd5ed);"></div>
+                <span>Alelo Recessivo (a)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #800080;"></div>
+                <span>Flor Roxa (AA ou Aa)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ffffff; border: 1px solid #ccc;"></div>
+                <span>Flor Branca (aa)</span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Desenvolvido para o ensino de Genética - 1ª Lei de Mendel</p>
+            <p>© 2023 Ciências Biológicas - Todos os direitos reservados</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const alleles = document.querySelectorAll('.allele');
+            const cells = document.querySelectorAll('.punnett-cell');
+            const resetBtn = document.getElementById('reset-btn');
+            const checkBtn = document.getElementById('check-btn');
+            
+            let draggedAllele = null;
+            
+            // Adiciona eventos de drag para os alelos
+            alleles.forEach(allele => {
+                allele.addEventListener('dragstart', dragStart);
+                allele.addEventListener('dragend', dragEnd);
+            });
+            
+            // Adiciona eventos para os quadrantes do quadro de Punnett
+            cells.forEach(cell => {
+                cell.addEventListener('dragover', dragOver);
+                cell.addEventListener('dragenter', dragEnter);
+                cell.addEventListener('dragleave', dragLeave);
+                cell.addEventListener('drop', dragDrop);
+            });
+            
+            // Botões de controle
+            resetBtn.addEventListener('click', resetGame);
+            checkBtn.addEventListener('click', checkResults);
+            
+            function dragStart(e) {
+                draggedAllele = this;
+                e.dataTransfer.setData('text/plain', this.dataset.allele);
+                setTimeout(() => this.style.opacity = '0.4', 0);
+            }
+            
+            function dragEnd() {
+                this.style.opacity = '1';
+                draggedAllele = null;
+            }
+            
+            function dragOver(e) {
+                e.preventDefault();
+            }
+            
+            function dragEnter(e) {
+                e.preventDefault();
+                this.classList.add('highlight');
+            }
+            
+            function dragLeave() {
+                this.classList.remove('highlight');
+            }
+            
+            function dragDrop(e) {
+                e.preventDefault();
+                this.classList.remove('highlight');
+                
+                const alleleValue = draggedAllele.dataset.allele;
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                // Determina se o alelo foi solto na parte superior ou lateral
+                if (y < rect.height * 0.3) {
+                    // Parte superior
+                    const topAllele = this.querySelector('.top-allele');
+                    if (!topAllele.textContent) {
+                        topAllele.textContent = alleleValue;
+                        topAllele.className = `top-allele ${alleleValue === 'A' ? 'dominant' : 'recessive'}`;
+                        draggedAllele.style.visibility = 'hidden';
+                    }
+                } else if (x < rect.width * 0.3) {
+                    // Lateral esquerda
+                    const leftAllele = this.querySelector('.left-allele');
+                    if (!leftAllele.textContent) {
+                        leftAllele.textContent = alleleValue;
+                        leftAllele.className = `left-allele ${alleleValue === 'A' ? 'dominant' : 'recessive'}`;
+                        draggedAllele.style.visibility = 'hidden';
+                    }
+                }
+                
+                // Verifica se o quadrante está completo
+                checkCellComplete(this);
+            }
+            
+            function checkCellComplete(cell) {
+                const topAllele = cell.querySelector('.top-allele');
+                const leftAllele = cell.querySelector('.left-allele');
+                
+                if (topAllele.textContent && leftAllele.textContent) {
+                    const genotype = topAllele.textContent + leftAllele.textContent;
+                    const phenotype = genotype.includes('A') ? 'purple' : 'white';
+                    
+                    const genotypeEl = cell.querySelector('.genotype');
+                    genotypeEl.textContent = genotype;
+                    
+                    const phenotypeEl = cell.querySelector('.phenotype');
+                    phenotypeEl.innerHTML = `
+                        <div class="plant">
+                            <div class="stem"></div>
+                            <div class="flower" style="background: ${phenotype === 'purple' ? '#800080' : '#ffffff'}; 
+                                ${phenotype === 'white' ? 'border: 2px solid #aaa;' : ''}">
+                                ${phenotype === 'purple' ? '🟣' : '⚪'}
+                            </div>
+                            <div class="phenotype-text">${phenotype === 'purple' ? 'Flor Roxa' : 'Flor Branca'}</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            function resetGame() {
+                // Restaura os alelos
+                alleles.forEach(allele => {
+                    allele.style.visibility = 'visible';
+                    allele.style.opacity = '1';
+                });
+                
+                // Limpa o quadro de Punnett
+                cells.forEach(cell => {
+                    const topAllele = cell.querySelector('.top-allele');
+                    const leftAllele = cell.querySelector('.left-allele');
+                    const genotype = cell.querySelector('.genotype');
+                    const phenotype = cell.querySelector('.phenotype');
+                    
+                    topAllele.textContent = '';
+                    leftAllele.textContent = '';
+                    topAllele.className = 'top-allele';
+                    leftAllele.className = 'left-allele';
+                    genotype.textContent = '';
+                    phenotype.innerHTML = '';
+                    
+                    cell.classList.remove('highlight');
+                });
+            }
+            
+            function checkResults() {
+                // Verifica se todos os quadrantes estão completos
+                const allComplete = Array.from(cells).every(cell => {
+                    const topAllele = cell.querySelector('.top-allele');
+                    const leftAllele = cell.querySelector('.left-allele');
+                    return topAllele.textContent && leftAllele.textContent;
+                });
+                
+                if (allComplete) {
+                    alert('Parabéns! Você completou todas as combinações genéticas!\n\nObserve as diferentes proporções de fenótipos.');
+                } else {
+                    alert('Complete todos os quadrantes antes de verificar!');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
